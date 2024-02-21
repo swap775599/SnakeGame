@@ -1,0 +1,126 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class Main extends JPanel implements KeyListener {
+    private static final int BOARD_WIDTH = 20;
+    private static final int BOARD_HEIGHT = 20;
+    private static final int CELL_SIZE = 20;
+    private static final int INITIAL_SNAKE_LENGTH = 3;
+    private static final int DELAY = 150; // milliseconds
+
+    private Snake snake;
+    private Food food;
+    private int score = 0;
+    private boolean gameOver = false;
+
+    public SnakeGame() {
+        setPreferredSize(new Dimension(BOARD_WIDTH * CELL_SIZE, BOARD_HEIGHT * CELL_SIZE));
+        setBackground(Color.BLACK);
+        setFocusable(true);
+        addKeyListener(this);
+        startGame();
+    }
+
+    private void startGame() {
+        snake = new Snake(INITIAL_SNAKE_LENGTH, new Point(BOARD_WIDTH / 2, BOARD_HEIGHT / 2), Snake.Direction.RIGHT);
+        food = new Food(BOARD_WIDTH, BOARD_HEIGHT);
+        score = 0;
+        gameOver = false;
+
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if (!gameOver) {
+                    moveSnake();
+                    checkCollisions();
+                    repaint();
+                }
+            }
+        }, DELAY, DELAY);
+    }
+
+    private void moveSnake() {
+        snake.move();
+        if (snake.getBody().get(0).equals(food.getPosition())) {
+            snake.grow();
+            score++;
+            food.respawn(BOARD_WIDTH, BOARD_HEIGHT);
+        }
+    }
+
+    private void checkCollisions() {
+        if (snake.checkCollision() || isOutOfBounds(snake.getBody().get(0))) {
+            gameOver = true;
+        }
+    }
+
+    private boolean isOutOfBounds(Point point) {
+        return point.x < 0 || point.x >= BOARD_WIDTH || point.y < 0 || point.y >= BOARD_HEIGHT;
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        if (!gameOver) {
+            // Draw food
+            g.setColor(Color.RED);
+            Point foodPosition = food.getPosition();
+            g.fillRect(foodPosition.x * CELL_SIZE, foodPosition.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+
+            // Draw snake
+            g.setColor(Color.GREEN);
+            for (Point segment : snake.getBody()) {
+                g.fillRect(segment.x * CELL_SIZE, segment.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            }
+
+            // Draw score
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Arial", Font.PLAIN, 20));
+            g.drawString("Score: " + score, 10, 20);
+        } else {
+            // Game over message
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Arial", Font.BOLD, 30));
+            String gameOverMsg = "Game Over! Score: " + score;
+            g.drawString(gameOverMsg, getWidth() / 2 - g.getFontMetrics().stringWidth(gameOverMsg) / 2, getHeight() / 2);
+        }
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {}
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        int keyCode = e.getKeyCode();
+        if (keyCode == KeyEvent.VK_UP && snake.getDirection() != Snake.Direction.DOWN) {
+            snake.setDirection(Snake.Direction.UP);
+        } else if (keyCode == KeyEvent.VK_DOWN && snake.getDirection() != Snake.Direction.UP) {
+            snake.setDirection(Snake.Direction.DOWN);
+        } else if (keyCode == KeyEvent.VK_LEFT && snake.getDirection() != Snake.Direction.RIGHT) {
+            snake.setDirection(Snake.Direction.LEFT);
+        } else if (keyCode == KeyEvent.VK_RIGHT && snake.getDirection() != Snake.Direction.LEFT) {
+            snake.setDirection(Snake.Direction.RIGHT);
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {}
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Snake Game");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setResizable(false);
+            frame.add(new SnakeGame(), BorderLayout.CENTER);
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        });
+    }
+}
