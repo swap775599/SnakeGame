@@ -1,0 +1,86 @@
+package A;
+
+import java.awt.Point;
+import java.util.ArrayList;
+
+public class Snake {
+    private ArrayList<Point> body;
+    private Direction direction;
+
+    public Snake(int initialLength, Point initialPosition, Direction initialDirection) {
+        body = new ArrayList<>();
+        for (int i = 0; i < initialLength; i++) {
+            body.add(new Point(initialPosition.x - i, initialPosition.y));
+        }
+        direction = initialDirection;
+    }
+
+    public void move() {
+        // Move the snake by adding a new head in the current direction
+        Point head = new Point(body.get(0));
+        switch (direction) {
+            case UP:
+                head.translate(0, -1);
+                break;
+            case DOWN:
+                head.translate(0, 1);
+                break;
+            case LEFT:
+                head.translate(-1, 0);
+                break;
+            case RIGHT:
+                head.translate(1, 0);
+                break;
+        }
+        // Add the new head and remove the tail
+        body.add(0, head);
+        body.remove(body.size() - 1);
+    }
+
+    public void grow() {
+        // To grow the snake, add a new head without removing the tail
+        Point head = new Point(body.get(0));
+        switch (direction) {
+            case UP:
+                head.translate(0, -1);
+                break;
+            case DOWN:
+                head.translate(0, 1);
+                break;
+            case LEFT:
+                head.translate(-1, 0);
+                break;
+            case RIGHT:
+                head.translate(1, 0);
+                break;
+        }
+        body.add(0, head);
+    }
+
+    public boolean checkCollision() {
+        // Check if the head collides with any other segment of the body
+        Point head = body.get(0);
+        for (int i = 1; i < body.size(); i++) {
+            if (head.equals(body.get(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public ArrayList<Point> getBody() {
+        return body;
+    }
+
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public void setDirection(Direction direction) {
+        this.direction = direction;
+    }
+
+    public enum Direction {
+        UP, DOWN, LEFT, RIGHT
+    }
+}
