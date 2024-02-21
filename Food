@@ -1,0 +1,25 @@
+import java.awt.Point;
+import java.util.Random;
+
+public class Food {
+    private Point position;
+
+    public Food(int boardWidth, int boardHeight) {
+        position = generateRandomPosition(boardWidth, boardHeight);
+    }
+
+    private Point generateRandomPosition(int boardWidth, int boardHeight) {
+        Random random = new Random();
+        int x = random.nextInt(boardWidth);
+        int y = random.nextInt(boardHeight);
+        return new Point(x, y);
+    }
+
+    public Point getPosition() {
+        return position;
+    }
+
+    public void respawn(int boardWidth, int boardHeight) {
+        position = generateRandomPosition(boardWidth, boardHeight);
+    }
+}
